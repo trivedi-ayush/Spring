@@ -2,47 +2,28 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3'
         jdk 'Java21'
+        maven 'Maven3'
     }
 
-    environment {
-        APP_NAME = "spring-boot-app"
-        DOCKER_IMAGE = "dockerayush2001/${APP_NAME}"
+    options {
+        timeout(time: 15, unit: 'MINUTES')
     }
 
     stages {
-
-        stage('Checkout') {
+        stage('Build Spring Boot JAR') {
             steps {
-                git branch: 'main', url: 'https://github.com/trivedi-ayush/Spring.git'
-            }
-        }
-
-        stage('Build & Test') {
-            steps {
-                sh 'mvn clean verify'
-            }
-        }
-
-        stage('Docker Build & Push') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:latest")
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
-                        docker.image("${DOCKER_IMAGE}:latest").push()
-                    }
-                }
+                sh 'mvn clean package -DskipTests -B'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Pipeline succeeded!'
+            echo '✅ Spring Boot JAR built successfully'
         }
         failure {
-            echo '❌ Pipeline failed. Check logs!'
+            echo '❌ Build failed'
         }
     }
 }
