@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "dockerayush2001/spring-app"
         DOCKER_TAG   = "latest"
+        KUBE_CONFIG  = "$HOME/.kube/config"
     }
 
     stages {
@@ -56,6 +57,34 @@ pipeline {
                 sh """
                   docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
                 """
+            }
+        }
+
+
+         stage('Check Minikube') {
+            steps {
+                sh '''
+                  minikube status
+                  kubectl cluster-info
+                '''
+            }
+        }
+
+        stage('Deploy to Minikube') {
+            steps {
+                sh '''
+                  kubectl apply -f k8s/deployment.yaml
+                  kubectl rollout status deployment/spring-app
+                '''
+            }
+        }
+
+         stage('Verify Deployment') {
+            steps {
+                sh '''
+                  kubectl get pods
+                  kubectl get svc
+                '''
             }
         }
     }
