@@ -60,8 +60,17 @@ pipeline {
             }
         }
 
+        // ✅ NEW STAGE: Auto Start Minikube
+        stage('Start Minikube') {
+            steps {
+                sh '''
+                  echo "Checking Minikube status..."
+                  minikube status || minikube start --driver=docker
+                '''
+            }
+        }
 
-         stage('Check Minikube') {
+        stage('Check Minikube') {
             steps {
                 sh '''
                   minikube status
@@ -79,7 +88,7 @@ pipeline {
             }
         }
 
-         stage('Verify Deployment') {
+        stage('Verify Deployment') {
             steps {
                 sh '''
                   kubectl get pods
